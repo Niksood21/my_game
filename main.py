@@ -20,7 +20,7 @@ class Sprite:
     def __init__(self, image, x, y):
         self.image = image
         self.rect = self.image.get_rect(topleft=(x, y))
-        self.speed = 1
+        self.speed = 2
 
     def move_left(self):
         if self.rect.x - self.speed >= 0:
@@ -77,7 +77,7 @@ while running:
         if keys[pygame.K_DOWN]:
             player.move_down()
         player.draw(screen)
-        clock.tick(120)
+        clock.tick(150)
     pygame.display.flip()
 pygame.quit()
 sys.exit()
