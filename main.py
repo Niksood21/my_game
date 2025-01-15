@@ -5,15 +5,14 @@ pygame.init()
 
 width, height = 800, 800
 screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption("Наша игра")
+pygame.display.set_caption("Космический шутер")
 
 white = (255, 255, 255)
 black = (0, 0, 0)
 
 font = pygame.font.Font(None, 48)
 
-
-# background_image = pygame.image.load("D:\projectpygame(game)\background_sky_stain_65935_1440x900.jpg").convert()
+background_image = pygame.image.load("images/background_image.jpg").convert()
 
 
 def initial_window(text):
@@ -38,8 +37,7 @@ while running:
         screen.fill(white)
         initial_window("Нажмите Enter, чтобы начать игру")
     else:
-        screen.fill(black)
-        # screen.blit(background_image, (0, 0))
+        screen.blit(background_image, (0, 0))
 
     pygame.display.flip()
 
