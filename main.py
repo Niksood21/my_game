@@ -14,6 +14,7 @@ font = pygame.font.Font(None, 48)
 
 background_image = pygame.image.load("images/background_image.jpg").convert()
 sprite_image = pygame.image.load("images/spaceship_image.png").convert_alpha()
+sprite_image1 = pygame.image.load("images/BossEnemy-Photoroom.png").convert_alpha()
 
 
 class Sprite:
@@ -43,6 +44,20 @@ class Sprite:
 
 
 player = Sprite(sprite_image, width // 2 - 50, height // 2 + 150)
+
+
+class Enemy:
+
+    def __init__(self, image, x, y, hp):
+        self.image = image
+        self.rect = self.image.get_rect(topleft=(x, y))
+        self.hp = hp
+
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
+
+
+enemy1 = Enemy(sprite_image1, 20, 20, 10)
 
 
 def initial_window(text):
@@ -77,7 +92,9 @@ while running:
         if keys[pygame.K_DOWN]:
             player.move_down()
         player.draw(screen)
+        enemy1.draw(screen)
         clock.tick(150)
+
     pygame.display.flip()
 pygame.quit()
 sys.exit()
