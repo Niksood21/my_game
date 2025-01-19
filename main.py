@@ -2,6 +2,7 @@ import pygame
 import sys
 
 pygame.init()
+pygame.mixer.init()
 
 width, height = 800, 800
 screen = pygame.display.set_mode((width, height))
@@ -16,7 +17,7 @@ background_image = pygame.image.load("images/background_image.jpg").convert()
 sprite_image = pygame.image.load("images/spaceship_image.png").convert_alpha()
 # sprite_image1 = pygame.image.load("images/BossEnemy-Photoroom.png").convert_alpha()
 bullet_image = pygame.image.load("images/bullet_image.png").convert_alpha()
-
+shoot_sound = pygame.mixer.Sound("sounds/bullet_sound.wav")
 
 class Sprite:
     def __init__(self, image, x, y):
@@ -120,6 +121,7 @@ while running:
         current_time = pygame.time.get_ticks()
         if current_time - last_shot_time >= shot_delay:
             bullets.append(Bullet(player.rect.centerx, player.rect.top))
+            shoot_sound.play()
             last_shot_time = current_time
 
         for bullet in bullets[:]:
