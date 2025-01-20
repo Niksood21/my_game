@@ -1,5 +1,6 @@
 import pygame
 import sys
+import random
 
 pygame.init()
 pygame.mixer.init()
@@ -9,7 +10,8 @@ screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Космический шутер")
 pygame.display.set_icon(pygame.image.load("images/icon.png").convert_alpha())
 bg_sound = pygame.mixer.Sound('sounds/background_sound.mp3')
-bg_sound.play()
+bg_sound.set_volume(0.2)
+bg_sound.play(-1)
 
 white = (255, 255, 255)
 black = (0, 0, 0)
@@ -20,6 +22,7 @@ background_image = pygame.image.load("images/background_image.jpg").convert()
 sprite_image = pygame.image.load("images/spaceship_image.png").convert_alpha()
 sprite_image1 = pygame.image.load("images/BossEnemy-Photoroom.png").convert_alpha()
 bullet_image = pygame.image.load("images/bullet_image.png").convert_alpha()
+enemy_bullet = pygame.image.load("images/enemy_bullet.png").convert_alpha()
 shoot_sound = pygame.mixer.Sound("sounds/bullet_sound.wav")
 
 
@@ -27,7 +30,9 @@ class Sprite:
     def __init__(self, image, x, y):
         self.image = image
         self.rect = self.image.get_rect(topleft=(x, y))
-        self.speed = 2
+        self.speed = 4
+        self.hp = 100
+        self.mxhp = 100
 
     def move_left(self):
         if self.rect.x - self.speed >= 0:
@@ -48,22 +53,70 @@ class Sprite:
     def draw(self, surface):
         surface.blit(self.image, self.rect)
 
+    def damage(self, damages):
+        self.hp -= damages
+        if self.hp < 0:
+            self.hp = 0
+
+    def draw_health_bar(self, surface):
+        pygame.draw.rect(surface, "red", (10, 10, 180, 20))
+        health_view = self.hp / self.mxhp
+        bar_width = 180 * health_view
+        pygame.draw.rect(surface, "green", (10, 10, bar_width, 20))
+
 
 player = Sprite(sprite_image, width // 2 - 50, height // 2 + 150)
 
 
 class Enemy:
-
-    def __init__(self, image, x, y, hp):
+    def __init__(self, image):
         self.image = image
-        self.rect = self.image.get_rect(topleft=(x, y))
-        self.hp = hp
+        self.rect = self.image.get_rect(topleft=(random.randint(0, width - 50), random.randint(0, height - 400)))
+        self.speed = random.uniform(1, 3)
+        self.x = random.choice([-1, 1])
+        self.y = random.choice([-1, 1])
+        self.bullets = []
+        self.last_shot_time = 0
+        self.shot_delay = 2000
+
+    def random_move(self):
+        self.rect.x += self.speed * self.x
+        self.rect.y += self.speed * self.y
+
+        if self.rect.left < 0 or self.rect.right > width:
+            self.x *= -1
+        if self.rect.top < 0 or self.rect.bottom > height:
+            self.y *= -1
+
+    def shoot(self):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_shot_time >= self.shot_delay:
+            bullet = EnemyBullet(self.rect.centerx, self.rect.bottom)
+            self.bullets.append(bullet)
+            self.last_shot_time = current_time
+
+    def update_bullets(self):
+        for bullet in self.bullets[:]:
+            bullet.move()
+            if bullet.is_off_screen():
+                self.bullets.remove(bullet)
+
+    def random_move(self):
+        self.rect.x += self.speed * self.x
+        self.rect.y += self.speed * self.y
+
+        if self.rect.left < 0 or self.rect.right > width:
+            self.x *= -1
+        if self.rect.top < 0 or self.rect.bottom > height:
+            self.y *= -1
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
+        for bullet_enemy in self.bullets:
+            bullet_enemy.draw(surface)
 
 
-enemy1 = Enemy(sprite_image1, 20, 20, 10)
+enemy1 = Enemy(sprite_image1)
 
 
 def initial_window(text):
@@ -86,6 +139,22 @@ class Bullet:
 
     def is_off_screen(self):
         return self.rect.bottom < 0
+
+
+class EnemyBullet:
+    def __init__(self, x, y):
+        self.image = enemy_bullet
+        self.rect = self.image.get_rect(center=(x, y))
+        self.speed = 5
+
+    def move(self):
+        self.rect.y += self.speed
+
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
+
+    def is_off_screen(self):
+        return self.rect.top > height
 
 
 bullets = []
@@ -120,10 +189,10 @@ while running:
         if keys[pygame.K_DOWN]:
             player.move_down()
 
-        player.draw(screen)
-        enemy1.draw(screen)
-
         current_time = pygame.time.get_ticks()
+        enemy1.shoot()
+        enemy1.update_bullets()
+
         if current_time - last_shot_time >= shot_delay:
             bullets.append(Bullet(player.rect.centerx, player.rect.top))
             shoot_sound.play()
@@ -134,6 +203,13 @@ while running:
             bullet.draw(screen)
             if bullet.is_off_screen():
                 bullets.remove(bullet)
+
+        player.draw(screen)
+        enemy1.random_move()
+        enemy1.draw(screen)
+        for bullet in enemy1.bullets:
+            bullet.draw(screen)
+        player.draw_health_bar(screen)
 
     clock.tick(60)
     pygame.display.flip()
