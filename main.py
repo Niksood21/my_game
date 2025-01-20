@@ -7,6 +7,9 @@ pygame.mixer.init()
 width, height = 800, 800
 screen = pygame.display.set_mode((width, height))
 pygame.display.set_caption("Космический шутер")
+pygame.display.set_icon(pygame.image.load("images/icon.png").convert_alpha())
+bg_sound = pygame.mixer.Sound('sounds/background_sound.mp3')
+bg_sound.play()
 
 white = (255, 255, 255)
 black = (0, 0, 0)
@@ -15,9 +18,10 @@ font = pygame.font.Font(None, 48)
 
 background_image = pygame.image.load("images/background_image.jpg").convert()
 sprite_image = pygame.image.load("images/spaceship_image.png").convert_alpha()
-# sprite_image1 = pygame.image.load("images/BossEnemy-Photoroom.png").convert_alpha()
+sprite_image1 = pygame.image.load("images/BossEnemy-Photoroom.png").convert_alpha()
 bullet_image = pygame.image.load("images/bullet_image.png").convert_alpha()
 shoot_sound = pygame.mixer.Sound("sounds/bullet_sound.wav")
+
 
 class Sprite:
     def __init__(self, image, x, y):
@@ -59,7 +63,8 @@ class Enemy:
         surface.blit(self.image, self.rect)
 
 
-# enemy1 = Enemy(sprite_image1, 20, 20, 10)
+enemy1 = Enemy(sprite_image1, 20, 20, 10)
+
 
 def initial_window(text):
     text_surface = font.render(text, True, black)
@@ -116,7 +121,7 @@ while running:
             player.move_down()
 
         player.draw(screen)
-        # enemy1.draw(screen)
+        enemy1.draw(screen)
 
         current_time = pygame.time.get_ticks()
         if current_time - last_shot_time >= shot_delay:
