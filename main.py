@@ -87,6 +87,8 @@ class Enemy:
         self.bullets = []
         self.last_shot_time = 0
         self.shot_delay = 2000
+        self.hp = 50
+        self.mxhp = 50
 
     def random_move(self):
         self.rect.x += self.speed * self.x
@@ -98,19 +100,19 @@ class Enemy:
             self.y *= -1
 
     def shoot(self):
-        current_time = pygame.time.get_ticks()
-        if current_time - self.last_shot_time >= self.shot_delay:
-            bullet = EnemyBullet(self.rect.centerx, self.rect.bottom)
-            self.bullets.append(bullet)
-            self.last_shot_time = current_time
+        current_time_enemy = pygame.time.get_ticks()
+        if current_time_enemy - self.last_shot_time >= self.shot_delay:
+            bullets_enemy = EnemyBullet(self.rect.centerx, self.rect.bottom)
+            self.bullets.append(bullets_enemy)
+            self.last_shot_time = current_time_enemy
 
     def update_bullets(self):
-        for bullet in self.bullets[:]:
-            bullet.move()
-            if bullet.is_off_screen():
-                self.bullets.remove(bullet)
+        for bullet_enemy in self.bullets[:]:
+            bullet_enemy.move()
+            if bullet_enemy.is_off_screen():
+                self.bullets.remove(bullet_enemy)
 
-    def random_move(self):
+    def random_move_enemy(self):
         self.rect.x += self.speed * self.x
         self.rect.y += self.speed * self.y
 
@@ -118,6 +120,14 @@ class Enemy:
             self.x *= -1
         if self.rect.top < 0 or self.rect.bottom > height:
             self.y *= -1
+
+    def damage(self, amount):
+        self.hp -= amount
+        if self.hp <= 0:
+            self.hp = 0
+
+    def alive(self):
+        return self.hp > 0
 
     def get_x(self):
         return self.rect.x
@@ -227,13 +237,19 @@ while running:
                 bullet.draw(screen)
                 if bullet.is_off_screen():
                     bullets.remove(bullet)
+                elif bullet.rect.colliderect(enemy1.rect) and enemy1.alive():
+                    enemy1.damage(25)
+                    bullets.remove(bullet)
 
             player.draw(screen)
-            enemy1.random_move()
-            enemy1.draw(screen)
-            for bullet in enemy1.bullets:
-                bullet.draw(screen)
-            player.draw_health_bar(screen)
+            if enemy1.alive():
+                enemy1.random_move()
+                enemy1.draw(screen)
+                for bullet in enemy1.bullets:
+                    bullet.draw(screen)
+                player.draw_health_bar(screen)
+            else:
+                initial_window("Враг уничтожен!")
 
             player_rect = sprite_image.get_rect(topleft=(player_x, player_y))
             enemy_rect = sprite_image1.get_rect(topleft=(enemy1.get_x(), enemy1.get_y()))
