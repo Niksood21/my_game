@@ -28,25 +28,35 @@ class Sprite:
         self.image = image
         self.rect = self.image.get_rect(topleft=(x, y))
         self.speed = 2
+        self.x = x
+        self.y = y
+
 
     def move_left(self):
         if self.rect.x - self.speed >= 0:
             self.rect.x -= self.speed
+            return self.rect.x
 
     def move_right(self):
         if self.rect.x + self.speed <= width - self.rect.width:
             self.rect.x += self.speed
+            return self.rect.x
 
     def move_up(self):
         if self.rect.y - self.speed >= 0:
             self.rect.y -= self.speed
+            return self.rect.y
 
     def move_down(self):
         if self.rect.y + self.speed <= height - self.rect.height:
             self.rect.y += self.speed
+            return self.rect.y
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
+
+    def restart(self):
+        self.rect = self.image.get_rect(topleft=(self.x, self.y))
 
 
 player = Sprite(sprite_image, width // 2 - 50, height // 2 + 150)
@@ -88,6 +98,9 @@ class Bullet:
         return self.rect.bottom < 0
 
 
+player_x = width // 2 - 50
+player_y = height // 2 + 150
+
 bullets = []
 last_shot_time = 0
 shot_delay = 500
@@ -95,6 +108,12 @@ shot_delay = 500
 running = True
 game_started = False
 clock = pygame.time.Clock()
+
+label = pygame.font.Font('fonts/OpenSans_Condensed-SemiBold.ttf', 40)
+restart_label = label.render("Играть заново", False, (115, 132, 148))
+restart_label_rect = restart_label.get_rect(topleft=(270, 450))
+
+gameplay = True
 
 while running:
     for event in pygame.event.get():
@@ -108,32 +127,56 @@ while running:
         screen.fill(white)
         initial_window("Нажмите Enter, чтобы начать игру")
     else:
-        screen.blit(background_image, (0, 0))
+        if gameplay:
+            screen.blit(background_image, (0, 0))
 
-        keys = pygame.key.get_pressed()
-        if keys[pygame.K_LEFT]:
-            player.move_left()
-        if keys[pygame.K_RIGHT]:
-            player.move_right()
-        if keys[pygame.K_UP]:
-            player.move_up()
-        if keys[pygame.K_DOWN]:
-            player.move_down()
+            keys = pygame.key.get_pressed()
+            if keys[pygame.K_LEFT]:
+                player_x = player.move_left()
+                print(player_x)
+            if keys[pygame.K_RIGHT]:
+                player_x = player.move_right()
+                print(player_x)
+            if keys[pygame.K_UP]:
+                player_y = player.move_up()
+                print(player_y)
+            if keys[pygame.K_DOWN]:
+                player_y = player.move_down()
+                print(player_y)
 
-        player.draw(screen)
-        enemy1.draw(screen)
+            player.draw(screen)
+            enemy1.draw(screen)
 
-        current_time = pygame.time.get_ticks()
-        if current_time - last_shot_time >= shot_delay:
-            bullets.append(Bullet(player.rect.centerx, player.rect.top))
-            shoot_sound.play()
-            last_shot_time = current_time
+            current_time = pygame.time.get_ticks()
+            if current_time - last_shot_time >= shot_delay:
+                bullets.append(Bullet(player.rect.centerx, player.rect.top))
+                shoot_sound.play()
+                last_shot_time = current_time
 
-        for bullet in bullets[:]:
-            bullet.move()
-            bullet.draw(screen)
-            if bullet.is_off_screen():
-                bullets.remove(bullet)
+            for bullet in bullets[:]:
+                bullet.move()
+                bullet.draw(screen)
+                if bullet.is_off_screen():
+                    bullets.remove(bullet)
+
+            player_rect = sprite_image.get_rect(topleft=(player_x, player_y))
+            enemy_rect = sprite_image1.get_rect(topleft=(20, 20))
+
+            if player_rect.colliderect(enemy_rect):
+                gameplay = False
+
+        else:
+            screen.fill((255, 255, 255))
+            initial_window("Вы проиграли(((")
+            screen.blit(restart_label, restart_label_rect)
+
+            mouse = pygame.mouse.get_pos()
+            if restart_label_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
+                gameplay = True
+                player_x = width // 2 - 50
+                player_y = height // 2 + 150
+                player.restart()
+
 
     clock.tick(60)
     pygame.display.flip()

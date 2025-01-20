@@ -1,0 +1,15 @@
+Index: main.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import pygame\r\nimport sys\r\n\r\npygame.init()\r\n\r\nwidth, height = 800, 800\r\nscreen = pygame.display.set_mode((width, height))\r\npygame.display.set_caption(\"Космический шутер\")\r\n\r\nwhite = (255, 255, 255)\r\nblack = (0, 0, 0)\r\n\r\nfont = pygame.font.Font(None, 48)\r\n\r\nbackground_image = pygame.image.load(\"images/background_image.jpg\").convert()\r\nsprite_image = pygame.image.load(\"images/spaceship_image.png\").convert_alpha()\r\n\r\n\r\nclass Sprite:\r\n    def __init__(self, image, x, y):\r\n        self.image = image\r\n        self.rect = self.image.get_rect(topleft=(x, y))\r\n        self.speed = 2\r\n\r\n    def move_left(self):\r\n        if self.rect.x - self.speed >= 0:\r\n            self.rect.x -= self.speed\r\n\r\n    def move_right(self):\r\n        if self.rect.x + self.speed <= width - self.rect.width:\r\n            self.rect.x += self.speed\r\n\r\n    def move_up(self):\r\n        if self.rect.y - self.speed >= 0:\r\n            self.rect.y -= self.speed\r\n\r\n    def move_down(self):\r\n        if self.rect.y + self.speed <= height - self.rect.height:\r\n            self.rect.y += self.speed\r\n\r\n    def draw(self, surface):\r\n        surface.blit(self.image, self.rect)\r\n\r\n\r\nplayer = Sprite(sprite_image, width // 2 - 50, height // 2 + 150)\r\n\r\n\r\ndef initial_window(text):\r\n    text_surface = font.render(text, True, black)\r\n    text_rect = text_surface.get_rect(center=(width // 2, height // 2))\r\n    screen.blit(text_surface, text_rect)\r\n\r\n\r\nrunning = True\r\ngame_started = False\r\nclock = pygame.time.Clock()\r\nwhile running:\r\n    for event in pygame.event.get():\r\n        if event.type == pygame.QUIT:\r\n            running = False\r\n        if event.type == pygame.KEYDOWN:\r\n            if event.key == pygame.K_RETURN:\r\n                game_started = True\r\n\r\n    if not game_started:\r\n        screen.fill(white)\r\n        initial_window(\"Нажмите Enter, чтобы начать игру\")\r\n    else:\r\n        screen.blit(background_image, (0, 0))\r\n        keys = pygame.key.get_pressed()\r\n        if keys[pygame.K_LEFT]:\r\n            player.move_left()\r\n        if keys[pygame.K_RIGHT]:\r\n            player.move_right()\r\n        if keys[pygame.K_UP]:\r\n            player.move_up()\r\n        if keys[pygame.K_DOWN]:\r\n            player.move_down()\r\n        player.draw(screen)\r\n        clock.tick(150)\r\n    pygame.display.flip()\r\npygame.quit()\r\nsys.exit()\r\n
+===================================================================
+diff --git a/main.py b/main.py
+--- a/main.py	
++++ b/main.py	
+@@ -80,4 +80,4 @@
+         clock.tick(150)
+     pygame.display.flip()
+ pygame.quit()
+-sys.exit()
++sys.exit()
+\ No newline at end of file
