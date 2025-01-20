@@ -201,6 +201,8 @@ restart_label = label.render("Играть заново", False, (115, 132, 148)
 restart_label_rect = restart_label.get_rect(topleft=(270, 450))
 gameplay = True
 
+cause = None # причина почему закончилась игра
+
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -253,22 +255,43 @@ while running:
                 player.draw_health_bar(screen)
             else:
                 initial_window("Враг уничтожен!")
+                cause = "win"
+                gameplay = False
 
             player_rect = sprite_image.get_rect(topleft=(player_x, player_y))
             enemy_rect = sprite_image1.get_rect(topleft=(enemy1.get_x(), enemy1.get_y()))
             if player_rect.colliderect(enemy_rect):
+                cause = "defeat"
                 gameplay = False
+
         else:
-            screen.fill((255, 255, 255))
-            initial_window("Вы проиграли(((")
-            screen.blit(restart_label, restart_label_rect)
-            mouse = pygame.mouse.get_pos()
-            if restart_label_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
-                gameplay = True
-                player_x = width // 2 - 50
-                player_y = height // 2 + 150
-                player.restart()
-                enemy1.restart()
+            if cause == "defeat":
+                screen.fill((255, 255, 255))
+                initial_window("Вы проиграли(((")
+                screen.blit(restart_label, restart_label_rect)
+                mouse = pygame.mouse.get_pos()
+                if restart_label_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
+                    gameplay = True
+                    player_x = width // 2 - 50
+                    player_y = height // 2 + 150
+                    player.restart()
+                    enemy1.restart()
+            elif cause == "win":
+                screen.fill((255, 255, 255))
+                initial_window("Вы выиграли(((")
+                screen.blit(restart_label, restart_label_rect)
+                mouse = pygame.mouse.get_pos()
+                if restart_label_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
+                    gameplay = True
+                    player_x = width // 2 - 50
+                    player_y = height // 2 + 150
+                    player.restart()
+                    enemy1.restart()
+                    enemy1.random_move()
+                    enemy1.draw(screen)
+                    enemy1.hp = 100
+
+
 
     clock.tick(60)
     pygame.display.flip()
