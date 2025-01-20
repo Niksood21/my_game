@@ -135,6 +135,9 @@ class Enemy:
     def get_y(self):
         return self.rect.y
 
+    def restart(self):
+        self.rect = self.image.get_rect(topleft=(random.randint(0, width - 50), random.randint(0, height - 400)))
+
     def draw(self, surface):
         surface.blit(self.image, self.rect)
         for bullet_enemy in self.bullets:
@@ -265,6 +268,7 @@ while running:
                 player_x = width // 2 - 50
                 player_y = height // 2 + 150
                 player.restart()
+                enemy1.restart()
 
     clock.tick(60)
     pygame.display.flip()
