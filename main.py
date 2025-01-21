@@ -73,6 +73,12 @@ class Sprite:
     def restart(self):
         self.rect = self.image.get_rect(topleft=(self.x, self.y))
 
+    def alive(self):
+        return self.hp > 0
+
+    def restart_hp(self):
+        self.hp = self.mxhp
+
 
 player = Sprite(sprite_image, width // 2 - 50, height // 2 + 150)
 
@@ -143,8 +149,8 @@ class Enemy:
         for bullet_enemy in self.bullets:
             bullet_enemy.draw(surface)
 
-
-enemy1 = Enemy(sprite_image1)
+    def restart_hp(self):
+        self.hp = self.mxhp
 
 
 def initial_window(text):
@@ -201,7 +207,9 @@ restart_label = label.render("Играть заново", False, (115, 132, 148)
 restart_label_rect = restart_label.get_rect(topleft=(270, 450))
 gameplay = True
 
-cause = None # причина почему закончилась игра
+cause = None
+
+enemies = [Enemy(sprite_image1) for _ in range(5)]
 
 while running:
     for event in pygame.event.get():
@@ -229,8 +237,21 @@ while running:
                 player_y = player.move_down()
 
             current_time = pygame.time.get_ticks()
-            enemy1.shoot()
-            enemy1.update_bullets()
+
+            for enemy in enemies:
+                enemy.shoot()
+                enemy.update_bullets()
+
+                if enemy.alive():
+                    enemy.random_move()
+                    enemy.draw(screen)
+
+                    for bullet_enemy in enemy.bullets:
+                        bullet_enemy.move()
+                        bullet_enemy.draw(screen)
+                        if bullet_enemy.rect.colliderect(player.rect) and player.alive():
+                            player.damage(10)
+                            enemy.bullets.remove(bullet_enemy)
 
             if current_time - last_shot_time >= shot_delay:
                 bullets.append(Bullet(player.rect.centerx, player.rect.top))
@@ -242,57 +263,51 @@ while running:
                 bullet.draw(screen)
                 if bullet.is_off_screen():
                     bullets.remove(bullet)
-                elif bullet.rect.colliderect(enemy1.rect) and enemy1.alive():
-                    enemy1.damage(25)
-                    bullets.remove(bullet)
+
+                for enemy in enemies[:]:
+                    player_rect = sprite_image.get_rect(topleft=(player_x, player_y))
+                    enemy_rect = sprite_image1.get_rect(topleft=(enemy.get_x(), enemy.get_y()))
+                    if player_rect.colliderect(enemy_rect):
+                        cause = "defeat"
+                        gameplay = False
+
+                    if bullet.rect.colliderect(enemy.rect) and enemy.alive():
+                        enemy.damage(25)
+                        bullets.remove(bullet)
+                        if not enemy.alive():
+                            enemies.remove(enemy)
 
             player.draw(screen)
-            if enemy1.alive():
-                enemy1.random_move()
-                enemy1.draw(screen)
-                for bullet in enemy1.bullets:
-                    bullet.draw(screen)
-                player.draw_health_bar(screen)
-            else:
-                initial_window("Враг уничтожен!")
+            player.draw_health_bar(screen)
+
+            if not enemies:
+                initial_window("Вы выиграли!!!")
                 cause = "win"
                 gameplay = False
 
-            player_rect = sprite_image.get_rect(topleft=(player_x, player_y))
-            enemy_rect = sprite_image1.get_rect(topleft=(enemy1.get_x(), enemy1.get_y()))
-            if player_rect.colliderect(enemy_rect):
+            if player.hp <= 0:
                 cause = "defeat"
                 gameplay = False
 
         else:
+            screen.fill((255, 255, 255))
             if cause == "defeat":
-                screen.fill((255, 255, 255))
                 initial_window("Вы проиграли(((")
-                screen.blit(restart_label, restart_label_rect)
-                mouse = pygame.mouse.get_pos()
-                if restart_label_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
-                    gameplay = True
-                    player_x = width // 2 - 50
-                    player_y = height // 2 + 150
-                    player.restart()
-                    enemy1.restart()
             elif cause == "win":
-                screen.fill((255, 255, 255))
-                initial_window("Вы выиграли(((")
-                screen.blit(restart_label, restart_label_rect)
-                mouse = pygame.mouse.get_pos()
-                if restart_label_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
-                    gameplay = True
-                    player_x = width // 2 - 50
-                    player_y = height // 2 + 150
-                    player.restart()
-                    enemy1.restart()
-                    enemy1.random_move()
-                    enemy1.draw(screen)
-                    enemy1.hp = 100
+                initial_window("Вы выиграли!!!")
 
+            screen.blit(restart_label, restart_label_rect)
+            mouse = pygame.mouse.get_pos()
+            if restart_label_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
+                gameplay = True
+                player_x = width // 2 - 50
+                player_y = height // 2 + 150
+                player.restart()
+                player.restart_hp()
 
-
+                enemies = [Enemy(sprite_image1) for _ in range(5)]
+                for i in enemies:
+                    i.restart_hp()
     clock.tick(60)
     pygame.display.flip()
 
