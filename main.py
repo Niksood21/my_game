@@ -11,7 +11,10 @@ pygame.display.set_caption("Космический шутер")
 pygame.display.set_icon(pygame.image.load("images/icon.png").convert_alpha())
 bg_sound = pygame.mixer.Sound('sounds/background_sound.mp3')
 bg_sound.set_volume(0.2)
-bg_sound.play(-1)
+bg_sound2 = pygame.mixer.Sound('sounds/bgsound2.mp3')
+bg_sound2.set_volume(0.2)
+bg_sound3 = pygame.mixer.Sound('sounds/bgsound3.mp3')
+bg_sound3.set_volume(0.2)
 
 white = (255, 255, 255)
 black = (0, 0, 0)
@@ -24,6 +27,8 @@ sprite_image1 = pygame.image.load("images/BossEnemy-Photoroom.png").convert_alph
 bullet_image = pygame.image.load("images/bullet_image.png").convert_alpha()
 enemy_bullet = pygame.image.load("images/enemy_bullet.png").convert_alpha()
 shoot_sound = pygame.mixer.Sound("sounds/bullet_sound.wav")
+BossBullet = pygame.image.load("images/BulletBoss.png").convert_alpha()
+Big_Enemy_Ship = pygame.image.load("images/BigEnemyShip.png").convert_alpha()
 
 
 class Sprite:
@@ -209,9 +214,55 @@ gameplay = True
 
 cause = None
 
-enemies = [Enemy(sprite_image1) for _ in range(5)]
+enemies = [Enemy(sprite_image1) for _ in range(7)]
+
+
+sound1 = False
+sound2 = False
+sound3 = False
+
 
 while running:
+
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_1]:
+        sound1 = True
+        sound2 = False
+        sound3 = False
+        bg_sound2.stop()
+        bg_sound3.stop()
+        if sound1:
+            bg_sound.stop()
+            bg_sound.play(-1)
+
+    if keys[pygame.K_2]:
+        sound1 = False
+        sound2 = True
+        sound3 = False
+        bg_sound.stop()
+        bg_sound3.stop()
+        if sound2:
+            bg_sound2.stop()
+            bg_sound2.play(-1)
+
+    if keys[pygame.K_3]:
+        sound1 = False
+        sound2 = False
+        sound3 = True
+        bg_sound.stop()
+        bg_sound2.stop()
+        if sound3:
+            bg_sound3.stop()
+            bg_sound3.play(-1)
+
+    if keys[pygame.K_0]:
+        sound1 = False
+        sound2 = False
+        sound3 = False
+        bg_sound.stop()
+        bg_sound2.stop()
+        bg_sound3.stop()
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -222,6 +273,7 @@ while running:
     if not game_started:
         screen.fill(white)
         initial_window("Нажмите Enter, чтобы начать игру")
+
     else:
         if gameplay:
             screen.blit(background_image, (0, 0))
