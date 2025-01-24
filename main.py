@@ -172,26 +172,51 @@ class Boss:
             self.speed_x *= -1
         self.rect.x += self.speed_x
 
-    def shoot(self):
-        current_time_enemy = pygame.time.get_ticks()
-        if current_time_enemy - self.last_shot_time >= self.shot_delay:
-            bullets_enemy = EnemyBullet(self.rect.centerx, self.rect.bottom)
-            self.bullets.append(bullets_enemy)
-            self.last_shot_time = current_time_enemy
+    def damage(self, amount):
+        self.hp -= amount
+        if self.hp <= 0:
+            self.hp = 0
 
-    def update_bullets(self):
-        for bullet_enemy in self.bullets[:]:
-            bullet_enemy.move()
-            if bullet_enemy.is_off_screen():
-                self.bullets.remove(bullet_enemy)
+    def shoot(self):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_shot_time >= self.shot_delay:
+            bullet = BossBullet(self.rect.centerx, self.rect.bottom)
+            self.bullets.append(bullet)
+            self.last_shot_time = current_time
 
     def alive(self):
         return self.hp > 0
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
-        for bullet_enemy in self.bullets:
-            bullet_enemy.draw(surface)
+        for bullet in self.bullets:
+            bullet.move()
+            bullet.draw(surface)
+
+            if bullet.is_off_screen():
+                self.bullets.remove(bullet)
+
+    def get_x(self):
+        return self.rect.x
+
+    def get_y(self):
+        return self.rect.y
+
+
+class BossBullet:
+    def __init__(self, x, y):
+        self.image = pygame.image.load("images/boss_bullet.png").convert_alpha()
+        self.rect = self.image.get_rect(center=(x, y))
+        self.speed_y = 5
+
+    def move(self):
+        self.rect.y += self.speed_y
+
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
+
+    def is_off_screen(self):
+        return self.rect.top > height
 
 
 boss = Boss(Big_Enemy_Ship)
@@ -370,22 +395,21 @@ while running:
             player.draw_health_bar(screen)
 
             if not enemies:
-                # initial_window("Вы выиграли!!!")
-                # cause = "win"
-                # gameplay = False
-                boss.shoot()
-                boss.update_bullets()
-
                 if boss.alive():
                     boss.move()
                     boss.draw(screen)
-
-                    for bullet_enemy_boss in boss.bullets:
-                        bullet_enemy_boss.move()
-                        bullet_enemy_boss.draw(screen)
-                        if bullet_enemy_boss.rect.colliderect(player.rect) and player.alive():
-                            player.damage(10)
-                            boss.bullets.remove(bullet_enemy_boss)
+                    player_rect = sprite_image.get_rect(topleft=(player_x, player_y))
+                    boss_rect = Big_Enemy_Ship.get_rect(topleft=(boss.get_x(), boss.get_y()))
+                    if player_rect.colliderect(boss_rect):
+                        cause = "defeat"
+                        gameplay = False
+                    for bullet in bullets[:]:
+                        if bullet.rect.colliderect(boss.rect) and boss.alive():
+                            boss.damage(200)
+                            bullets.remove(bullet)
+                            if not boss.alive():
+                                gameplay = False
+                                cause = "win"
 
             if player.hp <= 0:
                 cause = "defeat"
