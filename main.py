@@ -27,11 +27,11 @@ sprite_image1 = pygame.image.load("images/BossEnemy-Photoroom.png").convert_alph
 bullet_image = pygame.image.load("images/bullet_image.png").convert_alpha()
 enemy_bullet = pygame.image.load("images/enemy_bullet.png").convert_alpha()
 shoot_sound = pygame.mixer.Sound("sounds/bullet_sound.wav")
-BossBullet = pygame.image.load("images/BulletBoss.png").convert_alpha()
+BossBullet_image = pygame.image.load("images/BulletBoss.png").convert_alpha()
 Big_Enemy_Ship = pygame.image.load("images/BigEnemyShip.png").convert_alpha()
 
 
-class Sprite:
+class Player:
     def __init__(self, image, x, y):
         self.image = image
         self.rect = self.image.get_rect(topleft=(x, y))
@@ -85,7 +85,7 @@ class Sprite:
         self.hp = self.mxhp
 
 
-player = Sprite(sprite_image, width // 2 - 50, height // 2 + 150)
+player = Player(sprite_image, width // 2 - 50, height // 2 + 150)
 
 
 class Enemy:
@@ -156,6 +156,54 @@ class Enemy:
 
     def restart_hp(self):
         self.hp = self.mxhp
+
+
+class Boss:
+    def __init__(self):
+        self.image = Big_Enemy_Ship
+        self.rect = self.image.get_rect(center=(width // 2, 100))
+        self.hp = 300
+        self.speed_x = 3
+        self.speed_y = 1
+        self.bullets = []
+        self.last_shot_time = pygame.time.get_ticks()
+        self.shot_delay = 1000
+
+    def move(self):
+        if self.rect.right >= width or self.rect.left <= 0:
+            self.speed_x *= -1
+        if random.random() < 0.01:
+            if self.rect.bottom < height // 2:
+                self.rect.y += random.randint(5, 10)
+
+        self.rect.x += self.speed_x
+
+    def shoot(self):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.last_shot_time >= self.shot_delay:
+            bullet = BossBullet(self.rect.centerx, self.rect.bottom)
+            self.bullets.append(bullet)
+            shoot_sound.play()
+            self.last_shot_time = current_time
+
+    def draw(self):
+        screen.blit(self.image, self.rect)
+
+
+class BossBullet:
+    def __init__(self, x, y):
+        self.image = BossBullet_image
+        self.rect = self.image.get_rect(center=(x, y))
+        self.speed_y = 5
+
+    def move(self):
+        self.rect.y += self.speed_y
+
+    def draw(self):
+        screen.blit(self.image, self.rect)
+
+    def is_off_screen(self):
+        return self.rect.top > height
 
 
 def initial_window(text):
