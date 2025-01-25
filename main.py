@@ -161,6 +161,7 @@ class Boss:
         self.image = image
         self.rect = self.image.get_rect(topleft=(height // 2 - self.image.get_rect().size[0] // 2, width - 700))
         self.hp = 300
+        self.mxhp = 300
         self.speed_x = 3
         self.speed_y = 1
         self.bullets = []
@@ -201,6 +202,9 @@ class Boss:
 
     def get_y(self):
         return self.rect.y
+
+    def restart_hp(self):
+        self.hp = self.mxhp
 
 
 class BossBullet:
@@ -405,7 +409,7 @@ while running:
                         gameplay = False
                     for bullet in bullets[:]:
                         if bullet.rect.colliderect(boss.rect) and boss.alive():
-                            boss.damage(200)
+                            boss.damage(15)
                             bullets.remove(bullet)
                             if not boss.alive():
                                 gameplay = False
@@ -430,6 +434,7 @@ while running:
                 player_y = height // 2 + 150
                 player.restart()
                 player.restart_hp()
+                boss.restart_hp()
 
                 enemies = [Enemy(sprite_image1) for _ in range(7)]
                 for i in enemies:
