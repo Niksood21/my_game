@@ -86,6 +86,22 @@ class Player:
 player = Player(sprite_image)
 
 
+class Bullet:
+    def __init__(self, x, y):
+        self.image = bullet_image
+        self.rect = self.image.get_rect(center=(x, y))
+        self.speed = 5
+
+    def move(self):
+        self.rect.y -= self.speed
+
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
+
+    def is_off_screen(self):
+        return self.rect.bottom < 0
+
+
 class Enemy:
     def __init__(self, image):
         self.image = image
@@ -121,15 +137,6 @@ class Enemy:
             if bullet_enemy.is_off_screen():
                 self.bullets.remove(bullet_enemy)
 
-    def random_move_enemy(self):
-        self.rect.x += self.speed * self.x
-        self.rect.y += self.speed * self.y
-
-        if self.rect.left < 0 or self.rect.right > width:
-            self.x *= -1
-        if self.rect.top < 0 or self.rect.bottom > height:
-            self.y *= -1
-
     def damage(self, amount):
         self.hp -= amount
         if self.hp <= 0:
@@ -154,6 +161,22 @@ class Enemy:
 
     def restart_hp(self):
         self.hp = self.mxhp
+
+
+class EnemyBullet:
+    def __init__(self, x, y):
+        self.image = enemy_bullet
+        self.rect = self.image.get_rect(center=(x, y))
+        self.speed = 5
+
+    def move(self):
+        self.rect.y += self.speed
+
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
+
+    def is_off_screen(self):
+        return self.rect.top > height
 
 
 class Boss:
@@ -230,38 +253,6 @@ def initial_window(text):
     text_surface = font.render(text, True, black)
     text_rect = text_surface.get_rect(center=(width // 2, height // 2))
     screen.blit(text_surface, text_rect)
-
-
-class Bullet:
-    def __init__(self, x, y):
-        self.image = bullet_image
-        self.rect = self.image.get_rect(center=(x, y))
-        self.speed = 5
-
-    def move(self):
-        self.rect.y -= self.speed
-
-    def draw(self, surface):
-        surface.blit(self.image, self.rect)
-
-    def is_off_screen(self):
-        return self.rect.bottom < 0
-
-
-class EnemyBullet:
-    def __init__(self, x, y):
-        self.image = enemy_bullet
-        self.rect = self.image.get_rect(center=(x, y))
-        self.speed = 5
-
-    def move(self):
-        self.rect.y += self.speed
-
-    def draw(self, surface):
-        surface.blit(self.image, self.rect)
-
-    def is_off_screen(self):
-        return self.rect.top > height
 
 
 bullets = []
