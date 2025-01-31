@@ -117,10 +117,10 @@ class Enemy:
             self.last_shot_time = current_time_enemy
 
     def update_bullets(self):
-        for bullet_enemy in self.bullets[:]:
-            bullet_enemy.move()
-            if bullet_enemy.is_off_screen():
-                self.bullets.remove(bullet_enemy)
+        for bullet_enemy_update_1 in self.bullets[:]:
+            bullet_enemy_update_1.move()
+            if bullet_enemy_update_1.is_off_screen():
+                self.bullets.remove(bullet_enemy_update_1)
 
     def random_move_enemy(self):
         self.rect.x += self.speed * self.x
@@ -150,8 +150,8 @@ class Enemy:
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
-        for bullet_enemy in self.bullets:
-            bullet_enemy.draw(surface)
+        for bullet_enemy_1 in self.bullets:
+            bullet_enemy_1.draw(surface)
 
     def restart_hp(self):
         self.hp = self.mxhp
@@ -187,10 +187,10 @@ class EnemyLvl2:
             self.y *= -1
 
     def update_bullets(self):
-        for bullet_enemy in self.bullets[:]:
-            bullet_enemy.move()
-            if bullet_enemy.is_off_screen():
-                self.bullets.remove(bullet_enemy)
+        for bullet_enemy2 in self.bullets[:]:
+            bullet_enemy2.move()
+            if bullet_enemy2.is_off_screen():
+                self.bullets.remove(bullet_enemy2)
 
     def damage(self, amount):
         self.hp -= amount
@@ -198,19 +198,19 @@ class EnemyLvl2:
             self.hp = 0
 
     def shoot1(self):
-        current_time = pygame.time.get_ticks()
-        if current_time - self.last_shot_time >= self.shot_delay:
-            bullet = EnemyBullet(self.rect.centerx, self.rect.bottom)
-            self.bullets.append(bullet)
-            self.last_shot_time = current_time
+        current_time1 = pygame.time.get_ticks()
+        if current_time1 - self.last_shot_time >= self.shot_delay:
+            bullet1 = EnemyBullet(self.rect.centerx, self.rect.bottom)
+            self.bullets.append(bullet1)
+            self.last_shot_time = current_time1
 
     def alive(self):
         return self.hp > 0
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
-        for bullet_enemy in self.bullets:
-            bullet_enemy.draw(surface)
+        for bullet_enemy_2 in self.bullets:
+            bullet_enemy_2.draw(surface)
 
     def get_x(self):
         return self.rect.x
@@ -245,20 +245,20 @@ class Boss:
             self.hp = 0
 
     def shoot(self):
-        current_time = pygame.time.get_ticks()
-        if current_time - self.last_shot_time >= self.shot_delay:
-            bullet = BossBullet(self.rect.centerx, self.rect.bottom)
-            self.bullets.append(bullet)
-            self.last_shot_time = current_time
+        current_time_boss = pygame.time.get_ticks()
+        if current_time_boss - self.last_shot_time >= self.shot_delay:
+            bullet_boss = BossBullet(self.rect.centerx, self.rect.bottom)
+            self.bullets.append(bullet_boss)
+            self.last_shot_time = current_time_boss
 
     def alive(self):
         return self.hp > 0
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
-        for bullet in self.bullets:
-            bullet.move()
-            bullet.draw(surface)
+        for bullet_boss_draw in self.bullets:
+            bullet_boss_draw.move()
+            bullet_boss_draw.draw(surface)
 
             if bullet.is_off_screen():
                 self.bullets.remove(bullet)
@@ -474,26 +474,22 @@ while running:
 
                     if bullet.rect.colliderect(enemy.rect) and enemy.alive():
                         enemy.damage(25)
-                        bullets.remove(bullet)
+                        if bullet in bullets:
+                            bullets.remove(bullet)
                         if not enemy.alive():
                             enemies.remove(enemy)
 
-            for bullet in bullets[:]:
-                bullet.move()
-                bullet.draw(screen)
-                if bullet.is_off_screen():
-                    bullets.remove(bullet)
-
                 for enemy in enemies2[:]:
                     player_rect = sprite_image.get_rect(topleft=(player_x, player_y))
-                    enemy_rect = sprite_image1.get_rect(topleft=(enemy.get_x(), enemy.get_y()))
+                    enemy_rect = enemy_ship2.get_rect(topleft=(enemy.get_x(), enemy.get_y()))
                     if player_rect.colliderect(enemy_rect):
                         cause = "defeat"
                         gameplay = False
 
                     if bullet.rect.colliderect(enemy.rect) and enemy.alive():
                         enemy.damage(25)
-                        bullets.remove(bullet)
+                        if bullet in bullets:
+                            bullets.remove(bullet)
                         if not enemy.alive():
                             enemies2.remove(enemy)
 
