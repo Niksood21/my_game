@@ -334,7 +334,6 @@ bullets = []
 last_shot_time = 0
 shot_delay = 500
 
-
 running = True
 game_started = False
 clock = pygame.time.Clock()
@@ -355,6 +354,8 @@ enemies2 = [EnemyLvl2(enemy_ship2) for _ in range(2)]
 sound1 = False
 sound2 = False
 sound3 = False
+
+score = 0
 
 while running:
 
@@ -478,6 +479,14 @@ while running:
                             bullets.remove(bullet)
                         if not enemy.alive():
                             enemies.remove(enemy)
+                            if player.hp >= 90:
+                                score += 10
+                            if 60 <= player.hp < 90:
+                                score += 5
+                            if 30 <= player.hp < 60:
+                                score += 2
+                            if player.hp < 30:
+                                score += 1
 
                 for enemy in enemies2[:]:
                     player_rect = sprite_image.get_rect(topleft=(player_x, player_y))
@@ -492,9 +501,13 @@ while running:
                             bullets.remove(bullet)
                         if not enemy.alive():
                             enemies2.remove(enemy)
+                            score += 20
 
             player.draw(screen)
             player.draw_health_bar(screen)
+
+            score_view = font.render(f"Счет: {score}", True, black)
+            screen.blit(score_view, (10, 50))
 
             if not enemies and not enemies2:
                 if boss.alive():
@@ -510,6 +523,7 @@ while running:
                             boss.damage(15)
                             bullets.remove(bullet)
                             if not boss.alive():
+                                score += 50
                                 gameplay = False
                                 cause = "win"
 
@@ -523,6 +537,9 @@ while running:
                 initial_window("Вы проиграли(((")
             elif cause == "win":
                 initial_window("Вы выиграли!!!")
+                final_score_view = font.render(f"Ваш финальный счет: {score}", True, black)
+                screen.blit(final_score_view, (width // 2 - final_score_view.get_rect().size[0] // 2,
+                                               height // 2 + 20))
 
             screen.blit(restart_label, restart_label_rect)
             mouse = pygame.mouse.get_pos()
@@ -533,6 +550,7 @@ while running:
                 player.restart()
                 player.restart_hp()
                 boss.restart_hp()
+                score = 0
                 enemies = [Enemy(sprite_image1) for _ in range(7)]
                 for i in enemies:
                     i.restart_hp()
