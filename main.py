@@ -251,17 +251,19 @@ class Boss:
             self.bullets.append(bullet_boss)
             self.last_shot_time = current_time_boss
 
+    def update_bullets(self):
+        for boss_bullet in self.bullets[:]:
+            boss_bullet.move()
+            if boss_bullet.is_off_screen():
+                self.bullets.remove(boss_bullet)
+
     def alive(self):
         return self.hp > 0
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
-        for bullet_boss_draw in self.bullets:
-            bullet_boss_draw.move()
-            bullet_boss_draw.draw(surface)
-
-            if bullet.is_off_screen():
-                self.bullets.remove(bullet)
+        for bullet_enemy_2 in self.bullets:
+            bullet_enemy_2.draw(surface)
 
     def get_x(self):
         return self.rect.x
@@ -275,7 +277,7 @@ class Boss:
 
 class BossBullet:
     def __init__(self, x, y):
-        self.image = pygame.image.load("images/boss_bullet.png").convert_alpha()
+        self.image = BossBullet_image
         self.rect = self.image.get_rect(center=(x, y))
         self.speed_y = 5
 
@@ -513,6 +515,16 @@ while running:
                 if boss.alive():
                     boss.move()
                     boss.draw(screen)
+                    boss.shoot()
+                    boss.update_bullets()
+
+                    for bullet_enemy in boss.bullets:
+                        bullet_enemy.move()
+                        bullet_enemy.draw(screen)
+                        if bullet_enemy.rect.colliderect(player.rect) and player.alive():
+                            player.damage(10)
+                            boss.bullets.remove(bullet_enemy)
+
                     player_rect = sprite_image.get_rect(topleft=(player_x, player_y))
                     boss_rect = Big_Enemy_Ship.get_rect(topleft=(boss.get_x(), boss.get_y()))
                     if player_rect.colliderect(boss_rect):
