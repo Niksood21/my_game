@@ -408,13 +408,12 @@ while running:
                 game_started = True
 
     if not game_started:
-        screen.fill(white)
+        screen.blit(background_image, (0, 0))
         initial_window("Нажмите Enter, чтобы начать игру")
 
     else:
         if gameplay:
             screen.blit(background_image, (0, 0))
-
             keys = pygame.key.get_pressed()
             if keys[pygame.K_LEFT]:
                 player_x = player.move_left()
@@ -500,6 +499,7 @@ while running:
                     if bullet.rect.colliderect(enemy.rect) and enemy.alive():
                         enemy.damage(25)
                         if bullet in bullets:
+                            
                             bullets.remove(bullet)
                         if not enemy.alive():
                             enemies2.remove(enemy)
@@ -544,7 +544,7 @@ while running:
                 gameplay = False
 
         else:
-            screen.fill((255, 255, 255))
+            screen.blit(background_image, (0, 0))
             if cause == "defeat":
                 initial_window("Вы проиграли(((")
             elif cause == "win":
