@@ -91,7 +91,7 @@ class Enemy:
     def __init__(self, image):
         self.image = image
         self.rect = self.image.get_rect(topleft=(random.randint(0, width - 50), random.randint(0, height - 400)))
-        self.speed = random.uniform(1, 3)
+        self.speed = random.uniform(1, 2)
         self.x = random.choice([-1, 1])
         self.y = random.choice([-1, 1])
         self.bullets = []
@@ -163,7 +163,7 @@ class EnemyLvl2:
         self.rect = self.image.get_rect(topleft=(random.randint(0, width - 50), random.randint(0, height - 400)))
         self.hp = 100
         self.mxhp = 100
-        self.speed = random.uniform(1, 3)
+        self.speed = random.uniform(1, 2)
         self.x = random.choice([-1, 1])
         self.y = random.choice([-1, 1])
         self.bullets = []
@@ -344,13 +344,13 @@ player_x = width // 2 - 50
 player_y = height // 2 + 150
 
 label = pygame.font.Font('fonts/OpenSans_Condensed-SemiBold.ttf', 40)
-restart_label = label.render("Играть заново", False, (115, 132, 148))
+restart_label = label.render("Играть заново", False, (0, 0, 0))
 restart_label_rect = restart_label.get_rect(topleft=(270, 450))
 gameplay = True
 
 cause = None
 
-enemies = [Enemy(sprite_image1) for _ in range(7)]
+enemies = [Enemy(sprite_image1) for _ in range(5)]
 enemies2 = [EnemyLvl2(enemy_ship2) for _ in range(2)]
 
 sound1 = False
@@ -563,7 +563,7 @@ while running:
                 player.restart_hp()
                 boss.restart_hp()
                 score = 0
-                enemies = [Enemy(sprite_image1) for _ in range(7)]
+                enemies = [Enemy(sprite_image1) for _ in range(5)]
                 for i in enemies:
                     i.restart_hp()
 
