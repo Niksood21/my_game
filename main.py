@@ -351,7 +351,7 @@ gameplay = True
 cause = None
 
 enemies = [Enemy(sprite_image1) for _ in range(5)]
-enemies2 = [EnemyLvl2(enemy_ship2) for _ in range(2)]
+enemies2 = [EnemyLvl2(enemy_ship2) for _ in range(5)]
 
 sound1 = False
 sound2 = False
@@ -441,21 +441,6 @@ while running:
                             player.damage(10)
                             enemy.bullets.remove(bullet_enemy)
 
-            for enemy in enemies2:
-                enemy.shoot1()
-                enemy.update_bullets()
-
-                if enemy.alive():
-                    enemy.random_move()
-                    enemy.draw(screen)
-
-                    for bullet_enemy in enemy.bullets:
-                        bullet_enemy.move()
-                        bullet_enemy.draw(screen)
-                        if bullet_enemy.rect.colliderect(player.rect) and player.alive():
-                            player.damage(10)
-                            enemy.bullets.remove(bullet_enemy)
-
             if current_time - last_shot_time >= shot_delay:
                 bullets.append(Bullet(player.rect.centerx, player.rect.top))
                 shoot_sound.play()
@@ -489,55 +474,82 @@ while running:
                             if player.hp < 30:
                                 score += 1
 
-                for enemy in enemies2[:]:
-                    player_rect = sprite_image.get_rect(topleft=(player_x, player_y))
-                    enemy_rect = enemy_ship2.get_rect(topleft=(enemy.get_x(), enemy.get_y()))
-                    if player_rect.colliderect(enemy_rect):
-                        cause = "defeat"
-                        gameplay = False
-
-                    if bullet.rect.colliderect(enemy.rect) and enemy.alive():
-                        enemy.damage(25)
-                        if bullet in bullets:
-                            
-                            bullets.remove(bullet)
-                        if not enemy.alive():
-                            enemies2.remove(enemy)
-                            score += 20
-
             player.draw(screen)
             player.draw_health_bar(screen)
 
             score_view = font.render(f"Счет: {score}", True, black)
             screen.blit(score_view, (10, 50))
 
-            if not enemies and not enemies2:
-                if boss.alive():
-                    boss.move()
-                    boss.draw(screen)
-                    boss.shoot()
-                    boss.update_bullets()
+            if not enemies:
 
-                    for bullet_enemy in boss.bullets:
-                        bullet_enemy.move()
-                        bullet_enemy.draw(screen)
-                        if bullet_enemy.rect.colliderect(player.rect) and player.alive():
-                            player.damage(10)
-                            boss.bullets.remove(bullet_enemy)
+                for enemy in enemies2:
+                    enemy.shoot1()
+                    enemy.update_bullets()
 
-                    player_rect = sprite_image.get_rect(topleft=(player_x, player_y))
-                    boss_rect = Big_Enemy_Ship.get_rect(topleft=(boss.get_x(), boss.get_y()))
-                    if player_rect.colliderect(boss_rect):
-                        cause = "defeat"
-                        gameplay = False
-                    for bullet in bullets[:]:
-                        if bullet.rect.colliderect(boss.rect) and boss.alive():
-                            boss.damage(15)
-                            bullets.remove(bullet)
-                            if not boss.alive():
-                                score += 50
-                                gameplay = False
-                                cause = "win"
+                    if enemy.alive():
+                        enemy.random_move()
+                        enemy.draw(screen)
+
+                        for bullet_enemy in enemy.bullets:
+                            bullet_enemy.move()
+                            bullet_enemy.draw(screen)
+                            if bullet_enemy.rect.colliderect(player.rect) and player.alive():
+                                player.damage(10)
+                                enemy.bullets.remove(bullet_enemy)
+
+                if current_time - last_shot_time >= shot_delay:
+                    bullets.append(Bullet(player.rect.centerx, player.rect.top))
+                    shoot_sound.play()
+                    last_shot_time = current_time
+
+                for bullet in bullets[:]:
+                    bullet.move()
+                    bullet.draw(screen)
+                    if bullet.is_off_screen():
+                        bullets.remove(bullet)
+
+                    for enemy in enemies2[:]:
+                        player_rect = sprite_image.get_rect(topleft=(player_x, player_y))
+                        enemy_rect = enemy_ship2.get_rect(topleft=(enemy.get_x(), enemy.get_y()))
+                        if player_rect.colliderect(enemy_rect):
+                            cause = "defeat"
+                            gameplay = False
+
+                        if bullet.rect.colliderect(enemy.rect) and enemy.alive():
+                            enemy.damage(25)
+                            if bullet in bullets:
+                                bullets.remove(bullet)
+                            if not enemy.alive():
+                                enemies2.remove(enemy)
+                                score += 20
+
+                if not enemies2:
+                    if boss.alive():
+                        boss.move()
+                        boss.draw(screen)
+                        boss.shoot()
+                        boss.update_bullets()
+
+                        for bullet_enemy in boss.bullets:
+                            bullet_enemy.move()
+                            bullet_enemy.draw(screen)
+                            if bullet_enemy.rect.colliderect(player.rect) and player.alive():
+                                player.damage(10)
+                                boss.bullets.remove(bullet_enemy)
+
+                        player_rect = sprite_image.get_rect(topleft=(player_x, player_y))
+                        boss_rect = Big_Enemy_Ship.get_rect(topleft=(boss.get_x(), boss.get_y()))
+                        if player_rect.colliderect(boss_rect):
+                            cause = "defeat"
+                            gameplay = False
+                        for bullet in bullets[:]:
+                            if bullet.rect.colliderect(boss.rect) and boss.alive():
+                                boss.damage(15)
+                                bullets.remove(bullet)
+                                if not boss.alive():
+                                    score += 50
+                                    gameplay = False
+                                    cause = "win"
 
             if player.hp <= 0:
                 cause = "defeat"
@@ -567,7 +579,7 @@ while running:
                 for i in enemies:
                     i.restart_hp()
 
-                enemies2 = [EnemyLvl2(enemy_ship2) for _ in range(2)]
+                enemies2 = [EnemyLvl2(enemy_ship2) for _ in range(5)]
 
                 for n in enemies2:
                     n.restart_hp()
