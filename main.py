@@ -15,6 +15,8 @@ bg_sound2 = pygame.mixer.Sound('sounds/bgsound2.mp3')
 bg_sound2.set_volume(0.2)
 bg_sound3 = pygame.mixer.Sound('sounds/bgsound3.mp3')
 bg_sound3.set_volume(0.2)
+explosion_sound = pygame.mixer.Sound("sounds/explosion_sound.mp3")
+explosion_sound.set_volume(0.2)
 
 white = (255, 255, 255)
 black = (0, 0, 0)
@@ -90,7 +92,7 @@ player = Player(sprite_image)
 class Enemy:
     def __init__(self, image):
         self.image = image
-        self.rect = self.image.get_rect(topleft=(random.randint(0, width - 50), random.randint(0, height - 400)))
+        self.rect = self.image.get_rect(topleft=(random.randint(0, width - 100), random.randint(0, height - 400)))
         self.speed = random.uniform(1, 2)
         self.x = random.choice([-1, 1])
         self.y = random.choice([-1, 1])
@@ -146,7 +148,7 @@ class Enemy:
         return self.rect.y
 
     def restart(self):
-        self.rect = self.image.get_rect(topleft=(random.randint(0, width - 50), random.randint(0, height - 400)))
+        self.rect = self.image.get_rect(topleft=(random.randint(0, width - 100), random.randint(0, height - 400)))
 
     def draw(self, surface):
         surface.blit(self.image, self.rect)
@@ -160,7 +162,7 @@ class Enemy:
 class EnemyLvl2:
     def __init__(self, image):
         self.image = image
-        self.rect = self.image.get_rect(topleft=(random.randint(0, width - 50), random.randint(0, height - 400)))
+        self.rect = self.image.get_rect(topleft=(random.randint(0, width - 100), random.randint(0, height - 400)))
         self.hp = 100
         self.mxhp = 100
         self.speed = random.uniform(1, 2)
@@ -332,6 +334,30 @@ class EnemyBullet:
         return self.rect.top > height
 
 
+class Explosion:
+    def __init__(self, x, y):
+        self.images = [pygame.image.load(f"images/explosion_{image}.png").convert_alpha() for image in range(1, 4)]
+        self.index = 0
+        self.image = self.images[self.index]
+        self.rect = self.image.get_rect(center=(x, y))
+        self.animation_speed = 5
+        self.frame_counter = 0
+
+    def update(self):
+        self.frame_counter += 1
+        if self.frame_counter >= self.animation_speed:
+            self.frame_counter = 0
+            self.index += 1
+            if self.index >= len(self.images):
+                return False
+            self.image = self.images[self.index]
+        return True
+
+    def draw(self, surface):
+        surface.blit(self.image, self.rect)
+
+
+explosions = []
 bullets = []
 last_shot_time = 0
 shot_delay = 500
@@ -426,6 +452,11 @@ while running:
 
             current_time = pygame.time.get_ticks()
 
+            for explosion in explosions[:]:
+                if not explosion.update():
+                    explosions.remove(explosion)
+                explosion.draw(screen)
+
             for enemy in enemies:
                 enemy.shoot()
                 enemy.update_bullets()
@@ -464,6 +495,8 @@ while running:
                         if bullet in bullets:
                             bullets.remove(bullet)
                         if not enemy.alive():
+                            explosions.append(Explosion(enemy.rect.centerx, enemy.rect.centery))
+                            explosion_sound.play()
                             enemies.remove(enemy)
                             if player.hp >= 90:
                                 score += 10
@@ -520,6 +553,8 @@ while running:
                             if bullet in bullets:
                                 bullets.remove(bullet)
                             if not enemy.alive():
+                                explosions.append(Explosion(enemy.rect.centerx, enemy.rect.centery))
+                                explosion_sound.play()
                                 enemies2.remove(enemy)
                                 score += 20
 
