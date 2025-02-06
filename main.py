@@ -17,6 +17,7 @@ bg_sound3 = pygame.mixer.Sound('sounds/bgsound3.mp3')
 bg_sound3.set_volume(0.2)
 explosion_sound = pygame.mixer.Sound("sounds/explosion_sound.mp3")
 explosion_sound.set_volume(0.2)
+shoot_sound = pygame.mixer.Sound("sounds/bullet_sound.wav")
 
 white = (255, 255, 255)
 black = (0, 0, 0)
@@ -28,7 +29,6 @@ sprite_image = pygame.image.load("images/spaceship_image.png").convert_alpha()
 sprite_image1 = pygame.image.load("images/BossEnemy-Photoroom.png").convert_alpha()
 bullet_image = pygame.image.load("images/bullet_image.png").convert_alpha()
 enemy_bullet = pygame.image.load("images/enemy_bullet.png").convert_alpha()
-shoot_sound = pygame.mixer.Sound("sounds/bullet_sound.wav")
 BossBullet_image = pygame.image.load("images/BulletBoss.png").convert_alpha()
 Big_Enemy_Ship = pygame.image.load("images/BigEnemyShip.png").convert_alpha()
 enemy_ship2 = pygame.image.load("images/enemyship_lvl-2.png").convert_alpha()
@@ -113,10 +113,11 @@ class Enemy:
 
     def shoot(self):
         current_time_enemy = pygame.time.get_ticks()
-        if current_time_enemy - self.last_shot_time >= self.shot_delay:
-            bullets_enemy = EnemyBullet(self.rect.centerx, self.rect.bottom)
-            self.bullets.append(bullets_enemy)
-            self.last_shot_time = current_time_enemy
+        if current_time_enemy - game_start_time >= 2000:
+            if current_time_enemy - self.last_shot_time >= self.shot_delay:
+                bullets_enemy = EnemyBullet(self.rect.centerx, self.rect.bottom)
+                self.bullets.append(bullets_enemy)
+                self.last_shot_time = current_time_enemy
 
     def update_bullets(self):
         for bullet_enemy_update_1 in self.bullets[:]:
@@ -198,13 +199,6 @@ class EnemyLvl2:
         self.hp -= amount
         if self.hp <= 0:
             self.hp = 0
-
-    def shoot1(self):
-        current_time1 = pygame.time.get_ticks()
-        if current_time1 - self.last_shot_time >= self.shot_delay:
-            bullet1 = EnemyBullet(self.rect.centerx, self.rect.bottom)
-            self.bullets.append(bullet1)
-            self.last_shot_time = current_time1
 
     def alive(self):
         return self.hp > 0
@@ -361,6 +355,7 @@ explosions = []
 bullets = []
 last_shot_time = 0
 shot_delay = 500
+game_start_time = 0
 
 running = True
 game_started = False
@@ -432,6 +427,7 @@ while running:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_RETURN:
                 game_started = True
+                game_start_time = pygame.time.get_ticks()
 
     if not game_started:
         screen.blit(background_image, (0, 0))
@@ -516,7 +512,7 @@ while running:
             if not enemies:
 
                 for enemy in enemies2:
-                    enemy.shoot1()
+                    enemy.shoot()
                     enemy.update_bullets()
 
                     if enemy.alive():
@@ -604,6 +600,7 @@ while running:
             mouse = pygame.mouse.get_pos()
             if restart_label_rect.collidepoint(mouse) and pygame.mouse.get_pressed()[0]:
                 gameplay = True
+                game_start_time = pygame.time.get_ticks()
                 player_x = width // 2 - 50
                 player_y = height // 2 + 150
                 player.restart()
